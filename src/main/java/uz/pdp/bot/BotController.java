@@ -17,9 +17,7 @@ public class BotController {
     public void start() {
         telegramBot.setUpdatesListener(updates -> {
             for (Update update : updates) {
-                executorService.execute(() -> {
-                    handleUpdate(update);
-                });
+                executorService.execute(() -> handleUpdate(update));
             }
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
 
@@ -33,17 +31,19 @@ public class BotController {
             Message message = update.message();
             TgUser tgUser = getOrCreateUser(message.chat().id());
             if (message.text() != null) {
-               if(message.text().equals("/start")){
-                   acceptStartAskUser(tgUser);
-               }
+                if (message.text().equals("/start")) {
+                    acceptStartAskUser(tgUser);
+                }
             }
 
         } else if (update.callbackQuery() != null) {
             CallbackQuery callbackQuery = update.callbackQuery();
             String data = callbackQuery.data();
             TgUser tgUser = getOrCreateUser(callbackQuery.from().id());
-            if(tgUser.getState().equals(State.USERS)){
-                acceptUserAskPost(tgUser,data);
+            if (tgUser.getState().equals(State.USERS)) {
+                acceptUserAskPost(tgUser, data);
+            } else if (tgUser.getState().equals(State.POSTS)) {
+                acceptPostAskBody(tgUser, data);
             }
         }
     }

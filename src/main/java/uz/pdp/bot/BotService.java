@@ -8,7 +8,6 @@ import uz.pdp.DB;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static uz.pdp.bot.JsonService.getPost;
 import static uz.pdp.bot.JsonService.getUser;
@@ -33,7 +32,6 @@ public class BotService {
         List<User> USERS = getUser();
         SendMessage sendMessage = new SendMessage(tgUser.getChatId(), "USERS: ");
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-
         USERS.forEach(user ->
                 inlineKeyboardMarkup.addRow(
                         new InlineKeyboardButton(user.getName()).callbackData(String.valueOf(user.getId())),
@@ -56,12 +54,29 @@ public class BotService {
         POSTS.stream().filter(post -> post.getUserId().equals(Integer.parseInt(data))).
                 forEach(post ->
                         inlineKeyboardMarkup.addRow(
-                                new InlineKeyboardButton(selectedUser.getName()).callbackData("hahaha"),
-                                new InlineKeyboardButton(post.getTitle()).callbackData(String.valueOf(post.getId())))
-                );
 
+                                new InlineKeyboardButton(post.getTitle()).callbackData(String.valueOf(post.getId())),
+                                new InlineKeyboardButton("body").callbackData(String.valueOf(post.getId()))
+
+                        ));
         sendMessage.replyMarkup(inlineKeyboardMarkup);
         telegramBot.execute(sendMessage);
         tgUser.setState(State.POSTS);
     }
+
+    public static void acceptPostAskBody(TgUser tgUser, String data) {
+        List<Post> POSTS = getPost();
+        SendMessage sendMessage = new SendMessage(tgUser.getChatId(), "BODY");
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        POSTS.stream().filter(post -> post.getUserId().equals((Integer.parseInt(data))))
+                .forEach(post ->
+                        inlineKeyboardMarkup.addRow(
+                                new InlineKeyboardButton(post.getBody()).callbackData(String.valueOf(post.getId())))
+                );
+        sendMessage.replyMarkup(inlineKeyboardMarkup);
+        telegramBot.execute(sendMessage);
+        tgUser.setState(State.BODIES);
+    }
+
+
 }
